@@ -1,12 +1,51 @@
 import express from 'express';
 import db from './models/index.js';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+// Swagger definition
+const swaggerDefinition = {
+    openapi: '3.0.0',
+    info: {
+        title: 'My API',
+        version: '1.0.0',
+        description: 'A simple Express API',
+    },
+    servers: [
+        {
+            url: 'http://localhost:3000',
+            description: 'Development server',
+        },
+    ],
+};
+
+// Options for the swagger docs
+const options = {
+    swaggerDefinition,
+    apis: ['*.js'], // files containing annotations for the Swagger docs
+};
+
+// Initialize swagger-jsdoc
+const swaggerSpec = swaggerJsdoc(options);
+
+// Use swagger-ui-express for your app documentation endpoint
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 
 // Get all games
+/**
+ * @swagger
+ * /games:
+ *   get:
+ *     summary: Returns a array of games
+ *     responses:
+ *       200:
+ *         description: It gets me the games
+ */
 app.get('/games', async (req, res) => {
     try {
         const games = await db.Game.findAll();
